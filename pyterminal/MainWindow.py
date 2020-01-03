@@ -39,8 +39,8 @@ class MainWindow(Frame):
         self.logWidget.config(state="disabled")
 
     def doCMD(self, event=None):
-        self.cmdProcessor.start_thread(self.cmdEntry.get())
-        self.cmdEntry.config(state="disabled")
+        if self.cmdProcessor.parse(self.cmdEntry.get()):
+            self.cmdEntry.config(state="disabled")
     
     def endHook(self):
         self.cmdEntry.config(state="normal")
