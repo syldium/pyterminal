@@ -27,7 +27,7 @@ class MainWindow(Frame):
         self.cmdEntry = Entry(self)
         self.cmdEntry.pack(expand=False, fill=X)
         self.cmdEntry.bind("<Return>", self.doCMD)
-        self.cmdEntry.bind("<Command-a>", lambda e: self.cmdEntry.select_range(0, "end"))
+        #self.cmdEntry.bind("<Command-a>", lambda e: self.cmdEntry.select_range(0, "end"))
 
         self.cmdProcessor = CmdProcessor(self.write, self.endHook)
         self.master.bind("<Control-c>", self.cmdProcessor.sigint)
