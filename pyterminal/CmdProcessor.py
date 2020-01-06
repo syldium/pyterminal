@@ -16,6 +16,10 @@ class CmdProcessor:
         self.writer = writer # stdout
         self.onEnd = hook # Will be triggered when a command is completed
         self.working_dir = "."
+        if platform == "linux":
+            self.encoding = 'utf-8'
+        else:
+            self.encoding = 'cp850'
 
     def show(self, message):
         """Inserts message into the Text wiget"""
@@ -57,7 +61,7 @@ class CmdProcessor:
             # otherwise poll() returns the process's exit code
             while self.popen.poll() is None:
                 for line in lines_iterator:
-                    self.show(line.decode())
+                    self.show(line.decode(self.encoding))
             self.show("\n")
             print("Process `" + self.command  + "` terminated")
         except FileNotFoundError:
@@ -71,7 +75,7 @@ class CmdProcessor:
     def sigint(self, event=None):
         if self.popen:
             print("Sending keyboard interrupt signal")
-            if platform == "linux" or platform == "linux2":
+            if platform == "linux":
                 self.popen.send_signal(signal.SIGINT)
             else:
                 os.kill(self.popen.pid, signal.CTRL_C_EVENT)
