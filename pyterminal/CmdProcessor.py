@@ -1,3 +1,6 @@
+import os
+import signal
+from sys import platform
 from subprocess import Popen, PIPE
 from threading import Thread
 
@@ -64,6 +67,14 @@ class CmdProcessor:
 
         self.stop()
         self.onEnd()
+
+    def sigint(self, event=None):
+        if self.popen:
+            print("Sending keyboard interrupt signal")
+            if platform == "linux" or platform == "linux2":
+                self.popen.send_signal(signal.SIGINT)
+            else:
+                os.kill(self.popen.pid, signal.CTRL_C_EVENT)
 
     def stop(self):
         if self.popen:

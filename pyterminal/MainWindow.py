@@ -30,6 +30,7 @@ class MainWindow(Frame):
         self.cmdEntry.bind("<Command-a>", lambda e: self.cmdEntry.select_range(0, "end"))
 
         self.cmdProcessor = CmdProcessor(self.write, self.endHook)
+        self.master.bind("<Control-c>", self.cmdProcessor.sigint)
         self.write(getCmdInvite(), "invite")
 
     def write(self, message, tag):
