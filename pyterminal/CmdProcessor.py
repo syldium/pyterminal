@@ -1,3 +1,4 @@
+from locale import getpreferredencoding
 import os
 import signal
 from sys import platform
@@ -16,10 +17,7 @@ class CmdProcessor:
         self.writer = writer # stdout
         self.onEnd = hook # Will be triggered when a command is completed
         self.working_dir = "."
-        if platform == "linux":
-            self.encoding = 'utf-8'
-        else:
-            self.encoding = 'cp850'
+        self.encoding = getpreferredencoding()
 
     def show(self, message):
         """Inserts message into the Text wiget"""

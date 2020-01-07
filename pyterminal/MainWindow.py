@@ -11,7 +11,7 @@ class MainWindow(Frame):
     def __init__(self, windows, **kwargs):
         Frame.__init__(self, windows, **kwargs)
         self.master.title("Python terminal emulator")
-        self.pack(fill=BOTH)
+        self.pack(fill=BOTH, expand=True)
 
         self.text_options = {"state": "disabled",
                              "bg": "black",
