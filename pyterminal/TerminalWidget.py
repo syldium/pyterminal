@@ -12,6 +12,7 @@ class TerminalWidget(Frame):
         Frame.__init__(self, parent)
 
         self.history = [] # Stored commands of the current session
+        self.historyPos = 0 # Current position in the history
 
         # Set the command processor
         if cmdProcessor is None:
@@ -24,14 +25,15 @@ class TerminalWidget(Frame):
         self.getPrompt = getPrompt
 
         parent.master.bind("<Control-c>", self.processor.sigint) # Bind the key combination to exit
+        parent.master.bind("<Up>", lambda e: self.browseHistory(-1))
+        parent.master.bind("<Down>", lambda e: self.browseHistory(1))
 
         self.createWidgets()
         self.write(self.getPrompt(), "invite")
     
     def doCmd(self, event = None):
         """Executes the command entered."""
-        cmd = self.cmdEntry.get()
-        self.history.append(cmd)
+        self.historyPos += 1
         if self.processor.parse(self.cmdEntry.get()):
             self.cmdEntry.config(state="disabled")
     
@@ -40,6 +42,24 @@ class TerminalWidget(Frame):
         self.cmdEntry.config(state="normal")
         self.cmdEntry.delete(0, END)
         self.write(self.getPrompt(), "invite")
+
+    def browseHistory(self, direction):
+        """Browse through the command history and use the selected command."""
+        newPosition = self.historyPos + direction
+        if not -1 < newPosition < len(self.history):
+            return
+
+        self.historyPos = newPosition
+        cmd = self.history[self.historyPos]
+        self.cmdEntry.delete(0, END)
+        self.cmdEntry.insert(0, cmd)
+
+    def onKeyRelease(self, event = None):
+        """Update the history when a key is released."""
+        try:
+            self.history[self.historyPos] = self.cmdEntry.get()
+        except IndexError:
+            self.history.insert(self.historyPos, self.cmdEntry.get())
 
     def write(self, message, tag):
         """Write something in the logs."""
@@ -61,5 +81,6 @@ class TerminalWidget(Frame):
         self.logWidget.pack(expand=True, fill=BOTH)
 
         self.cmdEntry = Entry(self)
+        self.cmdEntry.bind('<KeyRelease>', self.onKeyRelease)
         self.cmdEntry.bind("<Return>", self.doCmd)
         self.cmdEntry.pack(expand=False, fill=X)
