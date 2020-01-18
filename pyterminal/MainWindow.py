@@ -1,4 +1,4 @@
-from .TerminalWidget import TerminalWidget
+from .LogicTerminalWidget import LogicTerminalWidget
 from tkinter import BOTH, Frame
 
 """
@@ -11,5 +11,5 @@ class MainWindow(Frame):
         self.master.title("Python terminal emulator")
         self.pack(fill=BOTH, expand=True)
 
-        self.terminal = TerminalWidget(self)
+        self.terminal = LogicTerminalWidget(self)
         self.terminal.pack(fill=BOTH, expand=True)

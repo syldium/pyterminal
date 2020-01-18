@@ -2,7 +2,7 @@ from locale import getpreferredencoding
 import os
 import signal
 from sys import platform
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
 from threading import Thread
 
 """
@@ -24,7 +24,6 @@ class CmdProcessor:
         self.writer(message, "log")
 
     def parse(self, command):
-        self.show(" " + command + "\n")
         if "cd " in command:
             vals = command.split(" ")
             if vals[1][0] == "/":
@@ -52,7 +51,7 @@ class CmdProcessor:
     def execute(self):
         try:
             # self.popen is a Popen object
-            self.popen = Popen(self.command.split(), stdout=PIPE, bufsize=1, cwd=self.working_dir)
+            self.popen = Popen(self.command.split(), stdout=PIPE, stderr=STDOUT, bufsize=1, cwd=self.working_dir)
             lines_iterator = iter(self.popen.stdout.readline, b"")
 
             # poll() return None if the process has not terminated
@@ -60,12 +59,11 @@ class CmdProcessor:
             while self.popen.poll() is None:
                 for line in lines_iterator:
                     self.show(line.decode(self.encoding))
-            self.show("\n")
             print("Process `" + self.command  + "` terminated")
         except FileNotFoundError:
-            self.show("Unknown command: " + self.command + "\n\n")                          
+            self.show("Unknown command: " + self.command + "\n")                          
         except IndexError:
-            self.show("No command entered\n\n")
+            self.show("No command entered\n")
 
         self.stop()
         self.onEnd()
@@ -85,3 +83,6 @@ class CmdProcessor:
             except ProcessLookupError:
                 pass 
         self.running = False
+    
+    def isRunning(self):
+        return self.running
