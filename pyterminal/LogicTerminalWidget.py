@@ -1,49 +1,49 @@
+from tkinter import Frame, Event
+from typing import Callable, List
+
 from .CmdProcessor import CmdProcessor
 from .TerminalWidget import TerminalWidget
 
-"""
-Implement terminal logic.
-"""
-class LogicTerminalWidget(TerminalWidget):
 
-    def __init__(self, parent, cmdProcessor = None, getPrompt = None):
-        TerminalWidget.__init__(self, parent, getPrompt)
+class LogicTerminalWidget(TerminalWidget):
+    """Implement terminal logic."""
+
+    def __init__(self, parent: Frame, cmd_processor: CmdProcessor = None, get_prompt: Callable[[], str] = None):
+        TerminalWidget.__init__(self, parent, get_prompt)
 
         # Set the command processor
-        if cmdProcessor is None:
-            cmdProcessor = CmdProcessor(self.write, self.prompt)
-        self.processor = cmdProcessor
+        self.processor = cmd_processor or CmdProcessor(self.write, self.prompt)
 
-        self.history = [] # Stored commands of the current session
-        self.historyPos = 0 # Current position in the history
+        self.history: List[str] = []  # Stored commands of the current session
+        self.historyPos = 0  # Current position in the history
 
-        self.bind("<Control-c>", self.processor.sigint) 
+        self.bind("<Control-c>", self.processor.sigint)
         self.bind("<Return>", self.enter)
-        self.bind("<Up>", lambda e: self.browseHistory(-1))
-        self.bind("<Down>", lambda e: self.browseHistory(1))
-        self.bind('<KeyRelease>', self.onKeyRelease)
+        self.bind("<Up>", lambda e: self.browse_history(-1))
+        self.bind("<Down>", lambda e: self.browse_history(1))
+        self.bind('<KeyRelease>', self.on_key_release)
 
-    def enter(self, e):
+    def enter(self, event: Event = None):
         """The <Return> key press handler"""
-        if self.processor.isRunning():
+        if self.processor.is_running():
             return
         self.historyPos += len(self.history)
         self.processor.parse(self.read_last_line())
-    
-    def browseHistory(self, direction):
+
+    def browse_history(self, direction: int) -> str:
         """Browse through the command history and use the selected command."""
-        newPosition = self.historyPos + direction
-        if not -1 < newPosition < len(self.history):
+        new_position = self.historyPos + direction
+        if not -1 < new_position < len(self.history):
             return "break"
 
-        self.historyPos = newPosition
+        self.historyPos = new_position
         cmd = self.history[self.historyPos]
         self.delete("committed_text", "end-1c")
         self.insert("committed_text", cmd)
         return "break"
-    
-    def onKeyRelease(self, event = None):
-        if not self.processor.isRunning():
+
+    def on_key_release(self, event: Event = None) -> None:
+        if not self.processor.is_running():
             try:
                 self.history[self.historyPos] = self.read_last_line()
             except IndexError:
