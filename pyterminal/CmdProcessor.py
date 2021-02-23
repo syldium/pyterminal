@@ -26,7 +26,7 @@ class CmdProcessor:
         self.writer = writer  # stdout
         self.onEnd = lambda :hook(self.working_dir)  # Will be triggered when a command is completed
         self.working_dir = os.getcwd() #"."
-        self.encoding = sys.stdout.encoding
+        self.encoding = "cp437"#sys.stdout.encoding
         self.onEnd()
 
     def show(self, message: str) -> None:
@@ -75,7 +75,7 @@ class CmdProcessor:
                 
                 with self.popen.stdout:
                     for line in iter(self.popen.stdout.readline, b''):
-                        self.show(line)#.decode(self.encoding))
+                        self.show(line.decode(self.encoding))
                 
                 
 #                 lines_iterator = iter(self.popen.stdout.readline, b"")
