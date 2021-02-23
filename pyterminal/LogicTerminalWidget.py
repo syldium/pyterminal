@@ -13,7 +13,7 @@ class LogicTerminalWidget(TerminalWidget):
 
         # Set the command processor
         self.processor = cmd_processor or CmdProcessor(self.write, self.prompt)
-
+        
         self.history: List[str] = []  # Stored commands of the current session
         self.historyPos = 0  # Current position in the history
 

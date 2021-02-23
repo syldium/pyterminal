@@ -36,13 +36,14 @@ class TerminalWidget(ScrolledText):
 
         self.tag_config("prompt", foreground="#4E9A06", selectbackground="#4E9A06", selectforeground="black")
 
-        self.prompt()
+#         self.prompt()
 
-    def prompt(self) -> None:
+    def prompt(self, cwd: str) -> None:
         """Insert a prompt"""
+        print("prompt", cwd)
         self.mark_set("prompt_end", 'end-1c')
         self.mark_gravity("prompt_end", LEFT)
-        self.write(self.get_prompt(), "prompt")
+        self.write(self.get_prompt(cwd), "prompt")
         self.write(" ", "log")
         self.mark_gravity("prompt_end", RIGHT)
 

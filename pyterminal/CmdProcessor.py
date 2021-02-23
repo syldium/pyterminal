@@ -18,27 +18,18 @@ class CmdProcessor:
         self.popen: Optional[Popen] = None  # Reference to the Popen object
         self.running = False  # Is a command running
         self.writer = writer  # stdout
-        self.onEnd = hook  # Will be triggered when a command is completed
-        self.working_dir = "."
+        self.onEnd = lambda :hook(self.working_dir)  # Will be triggered when a command is completed
+        self.working_dir = os.getcwd() #"."
         self.encoding = getpreferredencoding()
+        self.onEnd()
 
     def show(self, message: str) -> None:
         """Inserts message into the Text widget"""
         self.writer(message, "log")
 
     def parse(self, command: str) -> bool:
-        if "cd " in command:
-            vals = command.split(" ")
-            if vals[1][0] == "/":
-                self.working_dir = vals[1]
-            else:
-                self.working_dir = self.working_dir + "/" + vals[1]
-            self.show("\n")
-            self.onEnd()
-            return False
-        else:
-            self.start_thread(command)
-            return True
+        self.start_thread(command)
+        return True
 
     def start_thread(self, command: str) -> None:
         """Run a new command"""
@@ -53,36 +44,54 @@ class CmdProcessor:
 
     def execute(self) -> None:
         stdin = sys.stdin.fileno()
-
-        try:
-            # self.popen is a Popen object
-            self.popen = Popen(self.command.split(), stdin=PIPE, stdout=PIPE, stderr=STDOUT, bufsize=1,
-                               cwd=self.working_dir)
-            lines_iterator = iter(self.popen.stdout.readline, b"")
-
-            # poll() return None if the process has not terminated
-            # otherwise poll() returns the process's exit code
-            while self.popen.poll() is None:
-                for line in lines_iterator:
-                    self.show(line.decode(self.encoding))
-
-                if sys.platform == "win32":
-                    if msvcrt.kbhit(): 
-                        self.popen.communicate(os.read(stdin, 1024))
+        print("execute", self.command)
+        if "cd " in self.command:
+            vals = self.command.split(" ")
+            if vals[1][0] == "/":
+                self.working_dir = vals[1]
+            else:
+                self.working_dir = self.working_dir + "/" + vals[1]
+                self.working_dir = os.path.abspath(self.working_dir)
+#             self.show("\n")
+        else:
+            try:
+                # self.popen is a Popen object
+                self.popen = Popen(self.command.split(), stdin=PIPE, stdout=PIPE, stderr=STDOUT, bufsize=1,
+                                   cwd=self.working_dir)
+                lines_iterator = iter(self.popen.stdout.readline, b"")
+    
+                # poll() return None if the process has not terminated
+                # otherwise poll() returns the process's exit code
+                while self.popen.poll() is None:
+                    for line in lines_iterator:
+                        self.show(line.decode(self.encoding))
+    
+    #                 if sys.platform == "win32":
+    #                     if msvcrt.kbhit(): 
+    #                         self.popen.communicate(os.read(stdin, 1024))
+    #                         
+    #                 else:
+    #                     # Ne fonctionne as sous Windows car stdin n'est pas un socket :
+    #                     r, _, _ = select.select([sys.stdin], [], [], 0.2)
+    #                     if sys.stdin in r:
+    #                         self.popen.communicate(os.read(stdin, 1024))    
                         
-                else:
-                    # Ne fonctionne as sous Windows car stdin n'est pas un socket :
-                    r, _, _ = select.select([sys.stdin], [], [], 0.2)
-                    if sys.stdin in r:
-                        self.popen.communicate(os.read(stdin, 1024))    
-                    
-                    
-            print("Process `" + self.command + "` terminated")
-        except FileNotFoundError:
-            self.show("Unknown command: " + self.command + "\n")
-        except IndexError:
-            self.show("No command entered\n")
-
+                print("Process `" + self.command + "` terminated")
+                
+            except FileNotFoundError:
+                self.show("Unknown command: " + self.command + "\n")
+                
+            except PermissionError:
+                self.show("Access denied: " + self.command + "\n")
+                
+            except IndexError:
+                self.show("No command entered\n")
+                
+            
+    #         except:
+    #             self.show("Unknown error (" + self.command + ")\n")
+            
+            
         self.stop()
         self.onEnd()
 
