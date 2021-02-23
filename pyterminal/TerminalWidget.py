@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from hashlib import md5
 from typing import Callable, Dict
 
@@ -5,6 +6,7 @@ from .helpers import get_cmd_invite
 from tkinter import END, RIGHT, LEFT, Frame, Event
 from tkinter.scrolledtext import ScrolledText
 
+import sys
 
 class TerminalWidget(ScrolledText):
     """Custom widget based on the ScrolledText widget.
@@ -34,16 +36,39 @@ class TerminalWidget(ScrolledText):
 
         self.mark_set("prompt_end", 1.0)
 
-        self.tag_config("prompt", foreground="#4E9A06", selectbackground="#4E9A06", selectforeground="black")
+        # Aspects des �l�ments du prompt
+        self.tag_config("prompt_user", foreground="#5FD300", 
+                        selectbackground="#5FD300", selectforeground="black")
+        self.tag_config("prompt_host", foreground="#4E9A06", 
+                        selectbackground="#4E9A06", selectforeground="black")
+        self.tag_config("prompt_cwd", foreground="#EA2E00", 
+                        selectbackground="#EA2E00", selectforeground="black")
+        self.tag_config("prompt_@", foreground="white", 
+                        selectbackground="white", selectforeground="black")
+        self.tag_config("prompt_:", foreground="white", 
+                        selectbackground="white", selectforeground="black")
+        self.tag_config("prompt_$", foreground="white", 
+                        selectbackground="white", selectforeground="black")
 
 #         self.prompt()
 
     def prompt(self, cwd: str) -> None:
         """Insert a prompt"""
-        print("prompt", cwd)
         self.mark_set("prompt_end", 'end-1c')
         self.mark_gravity("prompt_end", LEFT)
-        self.write(self.get_prompt(cwd), "prompt")
+        u, h, d = self.get_prompt(cwd)
+        
+        if sys.platform == "win32":
+            self.write(d, "prompt_cwd")
+            self.write(">", "prompt_$")
+        else:
+            self.write(u, "prompt_user")
+            self.write("@", "prompt_@")
+            self.write(h, "prompt_host")
+            self.write(":", "prompt_:")
+            self.write(d, "prompt_cwd")
+            self.write("$", "prompt_$")
+        
         self.write(" ", "log")
         self.mark_gravity("prompt_end", RIGHT)
 
@@ -60,9 +85,9 @@ class TerminalWidget(ScrolledText):
         else:
             # if text is added before the last prompt, update the stored position of the tag
             for i, (tag_name, _, _) in reversed(list(enumerate(self.console_tags))):
-                if tag_name == "prompt":
-                    tag_ranges = self.tag_ranges("prompt")
-                    self.console_tags[i] = ("prompt", tag_ranges[-2], tag_ranges[-1])
+                if "prompt" in tag_name:
+                    tag_ranges = self.tag_ranges(tag_name)
+                    self.console_tags[i] = (tag_name, tag_ranges[-2], tag_ranges[-1])
                     break
 
         # update the hash and backup

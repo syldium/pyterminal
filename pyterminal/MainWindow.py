@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .LogicTerminalWidget import LogicTerminalWidget
 from tkinter import BOTH, Frame, Tk
 

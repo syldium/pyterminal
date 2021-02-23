@@ -9,10 +9,10 @@ from threading import Thread
 import select
 from typing import Optional, Callable, Any
 
-print(getpreferredencoding())
-print(sys.stdout.encoding)
-print(sys.stdin.encoding)
-
+# print(getpreferredencoding())
+# print(sys.stdout.encoding)
+# print(sys.stdin.encoding)
+# 
 if sys.platform == "win32":
     import msvcrt
 
@@ -50,7 +50,7 @@ class CmdProcessor:
 
     def execute(self) -> None:
         stdin = sys.stdin.fileno()
-
+        print("cwd", os.getcwd())
         if "cd " in self.command:
             vals = self.command.split(" ")
             if vals[1][0] == "/":
@@ -62,6 +62,9 @@ class CmdProcessor:
         elif self.command.strip() == "":
             pass
 
+        elif sys.platform == "win32" and os.path.isdir(self.command):
+            self.working_dir = os.path.abspath(self.command)
+            
         else:
             try:
                 # self.popen is a Popen object
@@ -87,15 +90,15 @@ class CmdProcessor:
 #                         print(line.decode('unicode_escape').encode().decode("utf-8"))
 #                         self.show(line)#.decode(self.encoding))
 
-    #                 if sys.platform == "win32":
-    #                     if msvcrt.kbhit(): 
-    #                         self.popen.communicate(os.read(stdin, 1024))
-    #                         
-    #                 else:
-    #                     # Ne fonctionne as sous Windows car stdin n'est pas un socket :
-    #                     r, _, _ = select.select([sys.stdin], [], [], 0.2)
-    #                     if sys.stdin in r:
-    #                         self.popen.communicate(os.read(stdin, 1024))    
+                    if sys.platform == "win32":
+                        if msvcrt.kbhit(): 
+                            self.popen.communicate(os.read(stdin, 1024))
+                             
+                    else:
+                        # Ne fonctionne as sous Windows car stdin n'est pas un socket :
+                        r, _, _ = select.select([sys.stdin], [], [], 0.2)
+                        if sys.stdin in r:
+                            self.popen.communicate(os.read(stdin, 1024))    
                         
                 print("Process `" + self.command + "` terminated")
                 

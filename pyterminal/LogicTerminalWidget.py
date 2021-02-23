@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from tkinter import Frame, Event
 from typing import Callable, List
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 try:
     from getpass import getuser
     from socket import gethostname
@@ -14,4 +15,4 @@ except ModuleNotFoundError:  # Windows issues with pwd
 
 
 def get_cmd_invite(cwd: str) -> (str):
-    return getuser(), "@", gethostname(), ":", cwd, "$"
+    return getuser(), gethostname(), cwd
