@@ -7,6 +7,8 @@ from threading import Thread
 import select
 from typing import Optional, Callable, Any
 
+if sys.platform == "win32":
+    import msvcrt
 
 class CmdProcessor:
     """Execute commands separately."""
@@ -64,9 +66,17 @@ class CmdProcessor:
                 for line in lines_iterator:
                     self.show(line.decode(self.encoding))
 
-                r, _, _ = select.select([sys.stdin], [], [], 0.2)
-                if sys.stdin in r:
-                    self.popen.communicate(os.read(stdin, 1024))
+                if sys.platform == "win32":
+                    if msvcrt.kbhit(): 
+                        self.popen.communicate(os.read(stdin, 1024))
+                        
+                else:
+                    # Ne fonctionne as sous Windows car stdin n'est pas un socket :
+                    r, _, _ = select.select([sys.stdin], [], [], 0.2)
+                    if sys.stdin in r:
+                        self.popen.communicate(os.read(stdin, 1024))    
+                    
+                    
             print("Process `" + self.command + "` terminated")
         except FileNotFoundError:
             self.show("Unknown command: " + self.command + "\n")
