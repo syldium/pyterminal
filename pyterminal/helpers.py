@@ -9,5 +9,9 @@ except ModuleNotFoundError:  # Windows issues with pwd
 
 
 
-def get_cmd_invite(cwd: str) -> str:
-    return getuser() + "@" + gethostname() + ":"+cwd+"$"
+# def get_cmd_invite(cwd: str) -> str:
+#     return getuser() + "@" + gethostname() + ":"+cwd+"$"
+
+
+def get_cmd_invite(cwd: str) -> (str):
+    return getuser(), "@", gethostname(), ":", cwd, "$"
