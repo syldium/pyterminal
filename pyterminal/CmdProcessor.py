@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from locale import getpreferredencoding
 import os
 import signal
@@ -6,6 +8,10 @@ from subprocess import Popen, PIPE, STDOUT
 from threading import Thread
 import select
 from typing import Optional, Callable, Any
+
+print(getpreferredencoding())
+print(sys.stdout.encoding)
+print(sys.stdin.encoding)
 
 if sys.platform == "win32":
     import msvcrt
@@ -20,7 +26,7 @@ class CmdProcessor:
         self.writer = writer  # stdout
         self.onEnd = lambda :hook(self.working_dir)  # Will be triggered when a command is completed
         self.working_dir = os.getcwd() #"."
-        self.encoding = getpreferredencoding()
+        self.encoding = sys.stdout.encoding
         self.onEnd()
 
     def show(self, message: str) -> None:
@@ -44,7 +50,7 @@ class CmdProcessor:
 
     def execute(self) -> None:
         stdin = sys.stdin.fileno()
-        print("execute", self.command)
+
         if "cd " in self.command:
             vals = self.command.split(" ")
             if vals[1][0] == "/":
@@ -52,20 +58,35 @@ class CmdProcessor:
             else:
                 self.working_dir = self.working_dir + "/" + vals[1]
                 self.working_dir = os.path.abspath(self.working_dir)
-#             self.show("\n")
+
+        elif self.command.strip() == "":
+            pass
+
         else:
             try:
                 # self.popen is a Popen object
-                self.popen = Popen(self.command.split(), stdin=PIPE, stdout=PIPE, stderr=STDOUT, bufsize=1,
+                self.popen = Popen(self.command.split(), 
+                                   shell=True,
+                                   stdin=PIPE, 
+                                   stdout=PIPE, stderr=STDOUT, bufsize=1,
+#                                    universal_newlines=True,
+#                                    encoding=self.encoding,
                                    cwd=self.working_dir)
-                lines_iterator = iter(self.popen.stdout.readline, b"")
-    
-                # poll() return None if the process has not terminated
-                # otherwise poll() returns the process's exit code
-                while self.popen.poll() is None:
-                    for line in lines_iterator:
-                        self.show(line.decode(self.encoding))
-    
+                
+                with self.popen.stdout:
+                    for line in iter(self.popen.stdout.readline, b''):
+                        self.show(line)#.decode(self.encoding))
+                
+                
+#                 lines_iterator = iter(self.popen.stdout.readline, b"")
+#     
+#                 # poll() return None if the process has not terminated
+#                 # otherwise poll() returns the process's exit code
+#                 while self.popen.poll() is None:
+#                     for line in lines_iterator:
+#                         print(line.decode('unicode_escape').encode().decode("utf-8"))
+#                         self.show(line)#.decode(self.encoding))
+
     #                 if sys.platform == "win32":
     #                     if msvcrt.kbhit(): 
     #                         self.popen.communicate(os.read(stdin, 1024))
