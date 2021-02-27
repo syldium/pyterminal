@@ -67,6 +67,7 @@ class CmdProcessor:
                     shell=True,
                     stdin=PIPE, stdout=PIPE, stderr=STDOUT,
                     bufsize=1,
+                    preexec_fn=os.setsid,
                     # universal_newlines=True,
                     # encoding=self.encoding,
                 )
@@ -118,9 +119,9 @@ class CmdProcessor:
         if self.popen:
             print("Sending keyboard interrupt signal")
             if sys.platform == "linux":
-                self.popen.send_signal(signal.SIGINT)
+                os.killpg(self.popen.pid, signal.SIGINT)
             else:
-                os.kill(self.popen.pid, signal.CTRL_C_EVENT)
+                os.killpg(self.popen.pid, signal.CTRL_C_EVENT)
 
     def stop(self) -> None:
         if self.popen:
