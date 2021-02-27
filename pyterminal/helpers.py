@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import Tuple
+
 try:
     from getpass import getuser
     from socket import gethostname
@@ -9,10 +11,5 @@ except ModuleNotFoundError:  # Windows issues with pwd
     gethostname = lambda: "hostname"
 
 
-
-# def get_cmd_invite(cwd: str) -> str:
-#     return getuser() + "@" + gethostname() + ":"+cwd+"$"
-
-
-def get_cmd_invite(cwd: str) -> (str):
+def get_cmd_invite(cwd: str) -> Tuple[str, str, str]:
     return getuser(), gethostname(), cwd

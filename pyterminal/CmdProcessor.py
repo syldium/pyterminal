@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-from locale import getpreferredencoding
 import os
 import signal
 import sys
@@ -9,17 +7,13 @@ from threading import Thread
 import select
 from typing import Optional, Callable, Any
 
-# print(getpreferredencoding())
-# print(sys.stdout.encoding)
-# print(sys.stdin.encoding)
-# 
 if sys.platform == "win32":
     import msvcrt
 
 class CmdProcessor:
     """Execute commands separately."""
 
-    def __init__(self, writer: Callable[[str, str], Any], hook: Callable[[], Any]):
+    def __init__(self, writer: Callable[[str, str], Any], hook: Callable[[str], Any]):
         self.command = ""  # Actual command
         self.popen: Optional[Popen] = None  # Reference to the Popen object
         self.running = False  # Is a command running
@@ -52,7 +46,7 @@ class CmdProcessor:
         stdin = sys.stdin.fileno()
         print("cwd", os.getcwd())
         if "cd " in self.command:
-            vals = self.command.split(" ")
+            vals = self.command.split()
             if vals[1][0] == "/":
                 self.working_dir = vals[1]
             else:
