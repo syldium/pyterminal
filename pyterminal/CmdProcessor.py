@@ -67,17 +67,18 @@ class CmdProcessor:
             
         else:
             try:
-                # self.popen is a Popen object
-                self.popen = Popen(self.command.split(), 
-                                   shell=True,
-                                   stdin=PIPE, 
-                                   stdout=PIPE, stderr=STDOUT, bufsize=1,
-#                                    universal_newlines=True,
-#                                    encoding=self.encoding,
-                                   cwd=self.working_dir)
+                self.popen = Popen(
+                    self.command,
+                    cwd=self.working_dir,
+                    shell=True,
+                    stdin=PIPE, stdout=PIPE, stderr=STDOUT,
+                    bufsize=1,
+                    # universal_newlines=True,
+                    # encoding=self.encoding,
+                )
                 
-                with self.popen.stdout:
-                    for line in iter(self.popen.stdout.readline, b''):
+                with self.popen.stdout as pipe:
+                    for line in iter(pipe.readline, b''):
                         self.show(line.decode(self.encoding))
                 
                 
