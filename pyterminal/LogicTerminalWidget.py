@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
 from tkinter import Frame, Event
 from typing import Callable, List
 
@@ -9,7 +10,7 @@ from .TerminalWidget import TerminalWidget
 class LogicTerminalWidget(TerminalWidget):
     """Implement terminal logic."""
 
-    def __init__(self, parent: Frame, cmd_processor: CmdProcessor = None, get_prompt: Callable[[], str] = None):
+    def __init__(self, parent: Frame, cmd_processor: CmdProcessor = None, get_prompt: Callable[[], Path] = None):
         TerminalWidget.__init__(self, parent, get_prompt)
 
         # Set the command processor

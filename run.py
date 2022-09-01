@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
 from pyterminal import window
 
-window()
+if __name__ == '__main__':
+    window()

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from hashlib import md5
+from pathlib import Path
 from typing import Callable, Dict
 
 from .helpers import get_cmd_invite
@@ -13,7 +14,7 @@ class TerminalWidget(ScrolledText):
     Original: https://gist.github.com/olisolomons/e90d53191d162d48ac534bf7c02a50cd
     """
 
-    def __init__(self, parent: Frame, get_prompt: Callable[[], str] = None):
+    def __init__(self, parent: Frame, get_prompt: Callable[[], Path] = None):
         ScrolledText.__init__(self, parent, **self.get_text_options())
 
         self.console_tags = []
@@ -56,7 +57,7 @@ class TerminalWidget(ScrolledText):
         """Insert a prompt"""
         self.mark_set("prompt_end", 'end-1c')
         self.mark_gravity("prompt_end", LEFT)
-        u, h, d = self.get_prompt(cwd)
+        u, h, d = self.get_prompt(Path(cwd))
         
         if sys.platform == "win32":
             self.write(d, "prompt_cwd")

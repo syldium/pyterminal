@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from pathlib import Path
 import signal
 import sys
 from subprocess import Popen, PIPE, STDOUT
@@ -43,19 +44,22 @@ class CmdProcessor:
             self.execute()
 
     def execute(self) -> None:
+        if not self.command.strip():
+            pass
+        argv = self.command.split()
+        argc = len(argv)
+        executable = argv[0]
         stdin = sys.stdin.fileno()
         print("cwd", os.getcwd())
-        if "cd " in self.command:
-            vals = self.command.split()
-            if vals[1][0] == "/":
-                self.working_dir = vals[1]
+        if executable == "cd":
+            if argc == 1:
+                path = Path.home()
             else:
-                self.working_dir = self.working_dir + "/" + vals[1]
-                self.working_dir = os.path.abspath(self.working_dir)
-
-        elif self.command.strip() == "":
-            pass
-
+                path = os.path.abspath(os.path.join(self.working_dir, argv[1]))
+            if os.path.exists(path):
+                self.working_dir = path
+            else:
+                self.show("No such file or directory\n")
         elif sys.platform == "win32" and os.path.isdir(self.command):
             self.working_dir = os.path.abspath(self.command)
             

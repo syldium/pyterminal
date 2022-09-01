@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
 from typing import Tuple
 
 try:
@@ -11,5 +12,8 @@ except ModuleNotFoundError:  # Windows issues with pwd
     gethostname = lambda: "hostname"
 
 
-def get_cmd_invite(cwd: str) -> Tuple[str, str, str]:
-    return getuser(), gethostname(), cwd
+def get_cmd_invite(cwd: Path) -> Tuple[str, str, str]:
+    working_directory = str(cwd)
+    if cwd.is_relative_to(Path.home()):
+        working_directory = '~' / cwd.relative_to(Path.home())
+    return getuser(), gethostname(), working_directory
